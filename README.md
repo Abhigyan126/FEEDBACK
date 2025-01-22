@@ -2,6 +2,8 @@
 
 A Flask-based web application that analyzes user comments using sentiment analysis, similarity detection, and AI-powered insights.
 
+```mermaid
+%%{init: {'theme': 'default', 'themeVariables': { 'fontSize': '16px'}, "securityLevel": "loose"}}%%
 graph LR
     A[CSV Upload] --> B[CommentCleaner]
     B --> C[Data Processing]
@@ -13,6 +15,7 @@ graph LR
     F --> I[Deduplicated Comments]
     I --> G
     G --> H
+```
 
 ## Features
 
