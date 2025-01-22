@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comments Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Comments Analysis</h1>
+        <div class="card mt-3">
+            <div class="card-body">
+                <form id="upload-form" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label">Upload CSV File</label>
+                        <input class="form-control" type="file" id="csvFile" name="file" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+                <div id="upload-result" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5>Analyze Comments</h5>
+                <form id="analyze-form">
+                    <div class="mb-3">
+                        <label for="maxComments" class="form-label">Max Comments</label>
+                        <input type="number" class="form-control" id="maxComments" name="max_comments" value="1000">
+                    </div>
+                    <div class="mb-3">
+                        <label for="similarityThreshold" class="form-label">Similarity Threshold</label>
+                        <input type="number" step="0.01" class="form-control" id="similarityThreshold" name="similarity_threshold" value="0.85">
+                    </div>
+                    <button type="submit" class="btn btn-success">Analyze</button>
+                </form>
+                <div id="analysis-result" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5>Ask a Question</h5>
+                <form id="message-form">
+                    <div class="mb-3">
+                        <textarea class="form-control" id="userMessage" name="user_message" rows="4" placeholder="Enter your question..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-info">Send</button>
+                </form>
+                <div id="message-response" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Upload CSV
+        $('#upload-form').on('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        $.ajax({
+            url: '/upload_csv',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+                if (data.error) {
+                    $('#upload-result').html(`<div class="alert alert-danger">${data.error}</div>`);
+                } else {
+                    $('#upload-result').html(`<div class="alert alert-success">${data.message} Total Comments: ${data.total_comments}</div>`);
+                }
+            },
+            error: function(xhr) {
+                $('#upload-result').html(`<div class="alert alert-danger">Error: ${xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error occurred'}</div>`);
+            }
+        });
+    });
+
+
+        // Analyze Comments
+        $('#analyze-form').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/analyze',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(data) {
+                    if (data.error) {
+                        $('#analysis-result').html(`<div class="alert alert-danger">${data.error}</div>`);
+                    } else {
+                        $('#analysis-result').html(`
+                            <h6>Sentiment Summary</h6>
+                            <p>Positive: ${data.sentiment_summary.positive}</p>
+                            <p>Negative: ${data.sentiment_summary.negative}</p>
+                            <p>Neutral: ${data.sentiment_summary.neutral}</p>
+                            <p>Average Sentiment: ${data.sentiment_summary.average_sentiment.toFixed(2)}</p>
+                            <h6>Insights</h6>
+                            <div>${data.insight}</div>
+                        `);
+                    }
+                },
+                error: function() {
+                    $('#analysis-result').html('<div class="alert alert-danger">Failed to analyze comments.</div>');
+                }
+            });
+        });
+
+        // Send Message
+        $('#message-form').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/send_message',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(data) {
+                    $('#message-response').html(`<div>${data.response}</div>`);
+                },
+                error: function() {
+                    $('#message-response').html('<div class="alert alert-danger">Failed to send message.</div>');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
