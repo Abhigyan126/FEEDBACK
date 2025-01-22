@@ -1,4 +1,4 @@
-# FEEDBACKl
+# FEEDBACK
 
 A Flask-based web application that analyzes user comments using sentiment analysis, similarity detection, and AI-powered insights.
 
